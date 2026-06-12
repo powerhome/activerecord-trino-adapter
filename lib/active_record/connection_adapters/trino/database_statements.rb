@@ -53,7 +53,7 @@ module ActiveRecord
         # rubocop:disable Metrics/AbcSize
         def run_trino_query(sql)
           start = monotonic_now
-          query = client.query(sql)
+          query = start_query(sql)
           internal = consume_query(query)
           capture_query_metadata(query)
           notify_slow_query(sql, monotonic_now - start)
@@ -68,6 +68,17 @@ module ActiveRecord
           query&.close if defined?(query) && query
         end
         # rubocop:enable Metrics/AbcSize
+
+        # With persistent: true we construct the query on our memoized
+        # keep-alive Faraday connection — the same thing Query.start does
+        # internally, minus the per-query Faraday it would build. Otherwise the
+        # stock trino-client path is untouched.
+        def start_query(sql)
+          return client.query(sql) unless persistent?
+
+          statement = ::Trino::Client::StatementClient.new(persistent_faraday, sql, @client_options)
+          ::Trino::Client::Query.new(statement)
+        end
 
         def consume_query(query)
           columns = query.columns || []

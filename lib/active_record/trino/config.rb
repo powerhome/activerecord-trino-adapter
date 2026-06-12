@@ -27,9 +27,14 @@ module ActiveRecord
           ssl: ssl,
           http_proxy: symbolized[:http_proxy],
           time_zone: symbolized[:time_zone],
+          gzip: symbolized[:gzip],
           query_timeout: symbolized.fetch(:query_timeout, DEFAULT_QUERY_TIMEOUT),
           plan_timeout: symbolized.fetch(:plan_timeout, DEFAULT_PLAN_TIMEOUT),
         }.compact
+      end
+
+      def persistent?(config)
+        !!symbolize(config).fetch(:persistent, false)
       end
 
       def default_port(ssl)
