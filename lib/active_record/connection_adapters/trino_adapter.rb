@@ -115,14 +115,14 @@ module ActiveRecord
 
       attr_reader :client, :last_query_id, :last_query_info_uri, :last_query_stats
 
+      def persistent?
+        @persistent
+      end
+
     private
 
       def build_client
         ::Trino::Client.new(@client_options)
-      end
-
-      def persistent?
-        @persistent
       end
 
       def persistent_faraday
