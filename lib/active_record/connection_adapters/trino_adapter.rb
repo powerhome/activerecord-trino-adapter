@@ -20,9 +20,6 @@ module ActiveRecord
     class TrinoAdapter < AbstractAdapter
       ADAPTER_NAME = "Trino"
 
-      # Keep-alive sockets idle longer than this are re-established before
-      # reuse. Must stay below typical load-balancer idle timeouts (often
-      # 120-350s) so we never write into a socket the LB already closed.
       PERSISTENT_IDLE_TIMEOUT = 100
 
       include Trino::Quoting
