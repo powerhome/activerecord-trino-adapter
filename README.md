@@ -104,9 +104,6 @@ load-balancer idle timeouts, and Trino protocol GET polls are retried
 transparently if the server closes a kept-alive socket. `disconnect!` shuts the
 pool down; `reconnect!` rebuilds it.
 
-The option is off by default in this release; without it the adapter behaves
-exactly as before.
-
 ## Instrumentation
 
 The adapter uses ActiveRecord's standard `AbstractAdapter#log` for query instrumentation, so any `ActiveSupport::Notifications` subscriber on `sql.active_record` picks up Trino queries automatically.
