@@ -53,8 +53,6 @@ module ActiveRecord
       end
 
       def disconnect!
-        # Faraday::Connection#close walks the middleware chain down to the
-        # adapter, which shuts down the Net::HTTP::Persistent pool.
         @persistent_faraday&.close
         @persistent_faraday = nil
         @client = nil
@@ -129,10 +127,6 @@ module ActiveRecord
         @persistent_faraday ||= build_persistent_faraday
       end
 
-      # Trino::Client.faraday_client returns a connection with auth, the
-      # X-Trino-* headers, ssl, proxy, and gzip already configured. We only
-      # swap its adapter for the keep-alive one, which is safe because the
-      # builder locks on first request and this connection has made none yet.
       def build_persistent_faraday
         faraday = ::Trino::Client.faraday_client(@client_options)
         faraday.builder.adapter(:net_http_persistent) do |http|

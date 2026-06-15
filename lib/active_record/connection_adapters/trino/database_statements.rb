@@ -69,10 +69,6 @@ module ActiveRecord
         end
         # rubocop:enable Metrics/AbcSize
 
-        # With persistent: true we construct the query on our memoized
-        # keep-alive Faraday connection — the same thing Query.start does
-        # internally, minus the per-query Faraday it would build. Otherwise the
-        # stock trino-client path is untouched.
         def start_query(sql)
           return client.query(sql) unless persistent?
 
