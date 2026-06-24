@@ -87,6 +87,22 @@ All keys are read from the `database.yml` entry:
 | `query_timeout` | `150` | Hard ceiling on query duration, in seconds. Cap lower for user-facing paths and higher for backfills |
 | `plan_timeout` | `30` | Ceiling on Trino query-planning phase, in seconds |
 | `slow_query_threshold_seconds` | `20` | Threshold above which an `active_record_trino.slow_query` notification is emitted |
+| `persistent` | `false` | Reuse one keep-alive HTTP connection per adapter instance instead of opening a fresh TCP+TLS connection for every request. See [Persistent HTTP connections](#persistent-http-connections) |
+| `gzip` | _nil_ | When `true`, requests gzip-compressed HTTP response bodies from Trino |
+
+### Persistent HTTP connections
+
+A single Trino query is 4-6 HTTP requests (`POST /v1/statement`, then repeated
+`nextUri` polls), and by default each one pays a full TCP + TLS handshake. With
+`persistent: true` the adapter keeps one keep-alive connection per adapter
+instance (Rails checks out one adapter instance per thread, so no locking is
+involved) and reuses it across requests and queries. Against a TLS-fronted
+cluster this typically saves several hundred milliseconds per query.
+
+Idle keep-alive sockets are recycled after 100 seconds, below typical
+load-balancer idle timeouts, and Trino protocol GET polls are retried
+transparently if the server closes a kept-alive socket. `disconnect!` shuts the
+pool down; `reconnect!` rebuilds it.
 
 ## Instrumentation
 

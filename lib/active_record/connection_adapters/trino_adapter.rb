@@ -2,6 +2,7 @@
 
 require "active_record"
 require "active_record/connection_adapters/abstract_adapter"
+require "faraday/net_http_persistent"
 require "trino-client"
 
 require "active_record/trino"
@@ -19,6 +20,8 @@ module ActiveRecord
     class TrinoAdapter < AbstractAdapter
       ADAPTER_NAME = "Trino"
 
+      PERSISTENT_IDLE_TIMEOUT = 100
+
       include Trino::Quoting
       include Trino::DatabaseStatements
       include Trino::SchemaStatements
@@ -28,6 +31,7 @@ module ActiveRecord
         super
         @client_options = ActiveRecord::Trino::Config.client_options(@config)
         @slow_query_threshold = ActiveRecord::Trino::Config.slow_query_threshold(@config)
+        @persistent = ActiveRecord::Trino::Config.persistent?(@config)
         @client = build_client
         install_safety_belts!
       end
@@ -46,6 +50,8 @@ module ActiveRecord
       end
 
       def disconnect!
+        @persistent_faraday&.close
+        @persistent_faraday = nil
         @client = nil
       end
 
@@ -104,10 +110,26 @@ module ActiveRecord
 
       attr_reader :client, :last_query_id, :last_query_info_uri, :last_query_stats
 
+      def persistent?
+        @persistent
+      end
+
     private
 
       def build_client
         ::Trino::Client.new(@client_options)
+      end
+
+      def persistent_faraday
+        @persistent_faraday ||= build_persistent_faraday
+      end
+
+      def build_persistent_faraday
+        faraday = ::Trino::Client.faraday_client(@client_options)
+        faraday.builder.adapter(:net_http_persistent) do |http|
+          http.idle_timeout = PERSISTENT_IDLE_TIMEOUT
+        end
+        faraday
       end
 
       def type_map

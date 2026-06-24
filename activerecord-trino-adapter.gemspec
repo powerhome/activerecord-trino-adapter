@@ -27,6 +27,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "activerecord", ">= 7.1", "< 8.1"
   spec.add_dependency "activesupport", ">= 7.1", "< 8.1"
+  spec.add_dependency "faraday-net_http_persistent", ">= 2.0"
   spec.add_dependency "trino-client", "2.2.4"
 
   spec.add_development_dependency "appraisal", "2.5.0"

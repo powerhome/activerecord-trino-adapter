@@ -61,6 +61,34 @@ RSpec.describe ActiveRecord::Trino::Config do
       expect { described_class.client_options(base_config.except(:user)) }
         .to raise_error(ActiveRecord::Trino::ConfigurationError, /user/)
     end
+
+    it "passes gzip through when set" do
+      options = described_class.client_options(base_config.merge(gzip: true))
+      expect(options[:gzip]).to be true
+    end
+
+    it "omits gzip when not configured" do
+      expect(described_class.client_options(base_config)).not_to have_key(:gzip)
+    end
+  end
+
+  describe ".persistent?" do
+    it "defaults to false" do
+      expect(described_class.persistent?(base_config)).to be false
+    end
+
+    it "is true when persistent: true" do
+      expect(described_class.persistent?(base_config.merge(persistent: true))).to be true
+    end
+
+    it "is false when persistent: false is explicit" do
+      expect(described_class.persistent?(base_config.merge(persistent: false))).to be false
+    end
+
+    it "accepts string keys (as database.yml usually provides)" do
+      string_keyed = base_config.merge(persistent: true).transform_keys(&:to_s)
+      expect(described_class.persistent?(string_keyed)).to be true
+    end
   end
 
   describe ".slow_query_threshold" do
