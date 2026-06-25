@@ -89,6 +89,8 @@ All keys are read from the `database.yml` entry:
 | `slow_query_threshold_seconds` | `20` | Threshold above which an `active_record_trino.slow_query` notification is emitted |
 | `persistent` | `false` | Reuse one keep-alive HTTP connection per adapter instance instead of opening a fresh TCP+TLS connection for every request. See [Persistent HTTP connections](#persistent-http-connections) |
 | `gzip` | _nil_ | When `true`, requests gzip-compressed HTTP response bodies from Trino |
+| `bulk_column_reflection` | `false` | Reflect every table's columns in a single `information_schema.columns` query instead of one per table. See [Bulk column reflection](#bulk-column-reflection) |
+| `static_schema` | `false` | Serve table existence from columns declared via `ActiveRecord::Trino.define_columns` instead of running `SHOW TABLES`. See [Static schema declarations](#static-schema-declarations) |
 
 ### Persistent HTTP connections
 
@@ -103,6 +105,47 @@ Idle keep-alive sockets are recycled after 100 seconds, below typical
 load-balancer idle timeouts, and Trino protocol GET polls are retried
 transparently if the server closes a kept-alive socket. `disconnect!` shuts the
 pool down; `reconnect!` rebuilds it.
+
+### Bulk column reflection
+
+By default the adapter reflects a model's columns with a single-table
+`information_schema.columns` query the first time ActiveRecord loads its schema.
+With `bulk_column_reflection: true`, the first reflection instead issues one
+`information_schema.columns` query for the whole catalog/schema and groups the
+result by table, memoized per connection. Since each Trino query carries a few
+hundred milliseconds of fixed overhead, reflecting N tables this way costs one
+round trip instead of N — useful when a process touches many warehouse tables.
+The cache is cleared on `reconnect!` and by `ActiveRecord::Trino.reset_schema_cache!`.
+
+### Static schema declarations
+
+If your team owns the warehouse schema, you can declare a table's columns in
+code and skip reflection entirely. Register columns with
+`ActiveRecord::Trino.define_columns`:
+
+```ruby
+ActiveRecord::Trino.define_columns("sales_by_day", [
+  { name: :territory_id, sql_type: "integer", null: false },
+  { name: :month,        sql_type: "date" },
+  { name: :amount,       sql_type: "decimal(18, 2)" }, # null defaults to true
+])
+```
+
+When a table is registered, `#columns` serves the declared definitions and never
+queries `information_schema`. Use the Trino SQL type strings (`bigint`,
+`integer`, `date`, `decimal(18, 2)`, `varchar`, `timestamp(3)`, `boolean`, …) —
+the same values `information_schema` would return — so type casting is identical.
+Declaration is per table: undeclared tables still reflect.
+
+Setting `static_schema: true` additionally serves table existence
+(`#data_sources`) from the registered tables, so `SHOW TABLES` is never run. With
+this enabled, every table the app queries must be declared, or ActiveRecord will
+treat it as nonexistent.
+
+Declarations become the source of truth: a column added, dropped, or retyped in
+the warehouse is not picked up until you update the declaration and redeploy
+(unlike reflection, which self-corrects on reconnect). Best suited to schemas
+your team controls and changes deliberately.
 
 ## Instrumentation
 
