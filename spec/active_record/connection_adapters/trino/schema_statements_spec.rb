@@ -10,23 +10,27 @@ RSpec.describe ActiveRecord::ConnectionAdapters::Trino::SchemaStatements do
   end
 
   describe "#columns" do
-    it "queries information_schema.columns and returns Trino::Column instances" do
-      expected_sql = <<~SQL.strip
-        SELECT column_name, data_type, is_nullable
+    let(:bulk_sql) do
+      <<~SQL.strip
+        SELECT table_name, column_name, data_type, is_nullable
         FROM information_schema.columns
         WHERE table_catalog = 'test_catalog'
           AND table_schema = 'test_schema'
-          AND table_name = 'orders'
-        ORDER BY ordinal_position
+        ORDER BY table_name, ordinal_position
       SQL
+    end
 
+    let(:statement_url) { "#{TrinoFake::BASE_URL}/v1/statement" }
+
+    it "reflects the whole schema in one information_schema query and returns Trino::Column instances" do
       stub_trino_query(
-        sql: expected_sql,
-        columns: [%w[column_name varchar], %w[data_type varchar], %w[is_nullable varchar]],
+        sql: bulk_sql,
+        columns: [%w[table_name varchar], %w[column_name varchar], %w[data_type varchar], %w[is_nullable varchar]],
         rows: [
-          %w[id bigint NO],
-          %w[name varchar YES],
-          ["created_at", "timestamp(3)", "YES"],
+          %w[orders id bigint NO],
+          %w[orders name varchar YES],
+          ["orders", "created_at", "timestamp(3)", "YES"],
+          %w[users id bigint NO],
         ]
       )
 
@@ -37,6 +41,37 @@ RSpec.describe ActiveRecord::ConnectionAdapters::Trino::SchemaStatements do
       expect(columns.first.null).to be false
       expect(columns[1].null).to be true
       expect(columns.last.cast_type).to be_a(ActiveModel::Type::DateTime)
+    end
+
+    it "serves every table from a single reflection query (no per-table round trips)" do
+      stub_trino_query(
+        sql: bulk_sql,
+        columns: [%w[table_name varchar], %w[column_name varchar], %w[data_type varchar], %w[is_nullable varchar]],
+        rows: [
+          %w[orders id bigint NO],
+          %w[users email varchar YES],
+        ]
+      )
+
+      expect(adapter.columns("orders").map(&:name)).to eq(%w[id])
+      expect(adapter.columns("users").map(&:name)).to eq(%w[email])
+      expect(adapter.columns("missing")).to eq([])
+
+      expect(a_request(:post, statement_url).with(body: bulk_sql)).to have_been_made.once
+    end
+
+    it "re-runs the reflection after the column cache is cleared" do
+      stub_trino_query(
+        sql: bulk_sql,
+        columns: [%w[table_name varchar], %w[column_name varchar], %w[data_type varchar], %w[is_nullable varchar]],
+        rows: [%w[orders id bigint NO]]
+      )
+
+      adapter.columns("orders")
+      adapter.clear_column_cache!
+      adapter.columns("orders")
+
+      expect(a_request(:post, statement_url).with(body: bulk_sql)).to have_been_made.twice
     end
   end
 

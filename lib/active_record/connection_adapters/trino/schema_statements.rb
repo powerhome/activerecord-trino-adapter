@@ -5,15 +5,7 @@ module ActiveRecord
     module Trino
       module SchemaStatements
         def columns(table_name)
-          rows = run_trino_query(columns_query(table_name.to_s)).rows
-          rows.map do |name, data_type, is_nullable|
-            Trino::Column.new(
-              name: name,
-              sql_type: data_type,
-              type: type_map.lookup(data_type),
-              null: nullable?(is_nullable)
-            )
-          end
+          column_definitions.fetch(table_name.to_s, [])
         end
 
         def data_sources
@@ -46,16 +38,36 @@ module ActiveRecord
           false
         end
 
+        def clear_column_cache!
+          @column_definitions = nil
+        end
+
       private
 
-        def columns_query(table_name)
+        def column_definitions
+          @column_definitions ||= load_column_definitions
+        end
+
+        def load_column_definitions
+          run_trino_query(all_columns_query).rows.group_by(&:first).transform_values do |rows|
+            rows.map do |_table_name, name, data_type, is_nullable|
+              Trino::Column.new(
+                name: name,
+                sql_type: data_type,
+                type: type_map.lookup(data_type),
+                null: nullable?(is_nullable)
+              )
+            end
+          end
+        end
+
+        def all_columns_query
           <<~SQL.strip
-            SELECT column_name, data_type, is_nullable
+            SELECT table_name, column_name, data_type, is_nullable
             FROM information_schema.columns
             WHERE table_catalog = #{quote(trino_catalog)}
               AND table_schema = #{quote(trino_schema)}
-              AND table_name = #{quote(table_name)}
-            ORDER BY ordinal_position
+            ORDER BY table_name, ordinal_position
           SQL
         end
 

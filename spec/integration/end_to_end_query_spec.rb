@@ -17,11 +17,11 @@ RSpec.describe "end-to-end Trino-backed AR model" do
 
     stub_trino_query(
       sql: /information_schema\.columns/,
-      columns: [%w[column_name varchar], %w[data_type varchar], %w[is_nullable varchar]],
+      columns: [%w[table_name varchar], %w[column_name varchar], %w[data_type varchar], %w[is_nullable varchar]],
       rows: [
-        %w[id bigint NO],
-        %w[territory_id integer YES],
-        ["total", "decimal(10, 2)", "YES"],
+        %w[orders id bigint NO],
+        %w[orders territory_id integer YES],
+        ["orders", "total", "decimal(10, 2)", "YES"],
       ],
       query_id: "schema"
     )

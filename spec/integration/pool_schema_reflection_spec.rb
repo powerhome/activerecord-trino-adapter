@@ -20,8 +20,8 @@ RSpec.describe "pool-level schema reflection" do
     )
     stub_trino_query(
       sql: /information_schema\.columns/,
-      columns: [%w[column_name varchar], %w[data_type varchar], %w[is_nullable varchar]],
-      rows: [%w[id bigint NO]],
+      columns: [%w[table_name varchar], %w[column_name varchar], %w[data_type varchar], %w[is_nullable varchar]],
+      rows: [%w[orders id bigint NO]],
       query_id: "columns"
     )
   end

@@ -53,6 +53,7 @@ module ActiveRecord
         @persistent_faraday&.close
         @persistent_faraday = nil
         @client = nil
+        clear_column_cache!
       end
 
       def supports_transactions?

@@ -17,14 +17,14 @@ RSpec.describe "SQL injection prevention through the AR pipeline" do
 
     stub_trino_query(
       sql: /information_schema\.columns/,
-      columns: [%w[column_name varchar], %w[data_type varchar], %w[is_nullable varchar]],
+      columns: [%w[table_name varchar], %w[column_name varchar], %w[data_type varchar], %w[is_nullable varchar]],
       rows: [
-        %w[id bigint NO],
-        %w[name varchar YES],
-        ["age", "integer", "YES"],
-        ["balance", "decimal(10, 2)", "YES"],
-        ["active", "boolean", "YES"],
-        %w[birthdate date YES],
+        %w[users id bigint NO],
+        %w[users name varchar YES],
+        ["users", "age", "integer", "YES"],
+        ["users", "balance", "decimal(10, 2)", "YES"],
+        ["users", "active", "boolean", "YES"],
+        %w[users birthdate date YES],
       ],
       query_id: "schema"
     )
