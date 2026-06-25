@@ -41,6 +41,10 @@ module ActiveRecord
         !!symbolize(config).fetch(:bulk_column_reflection, false)
       end
 
+      def static_schema?(config)
+        !!symbolize(config).fetch(:static_schema, false)
+      end
+
       def default_port(ssl)
         ssl ? DEFAULT_HTTPS_PORT : DEFAULT_HTTP_PORT
       end

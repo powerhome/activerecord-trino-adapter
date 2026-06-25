@@ -106,6 +106,21 @@ RSpec.describe ActiveRecord::Trino::Config do
     end
   end
 
+  describe ".static_schema?" do
+    it "defaults to false" do
+      expect(described_class.static_schema?(base_config)).to be false
+    end
+
+    it "is true when static_schema: true" do
+      expect(described_class.static_schema?(base_config.merge(static_schema: true))).to be true
+    end
+
+    it "accepts string keys (as database.yml usually provides)" do
+      string_keyed = base_config.merge(static_schema: true).transform_keys(&:to_s)
+      expect(described_class.static_schema?(string_keyed)).to be true
+    end
+  end
+
   describe ".slow_query_threshold" do
     it "defaults to 20.0 seconds" do
       expect(described_class.slow_query_threshold(base_config)).to eq(20.0)

@@ -33,6 +33,7 @@ module ActiveRecord
         @slow_query_threshold = ActiveRecord::Trino::Config.slow_query_threshold(@config)
         @persistent = ActiveRecord::Trino::Config.persistent?(@config)
         @bulk_column_reflection = ActiveRecord::Trino::Config.bulk_column_reflection?(@config)
+        @static_schema = ActiveRecord::Trino::Config.static_schema?(@config)
         @client = build_client
         install_safety_belts!
       end
@@ -118,6 +119,10 @@ module ActiveRecord
 
       def bulk_column_reflection?
         @bulk_column_reflection
+      end
+
+      def static_schema?
+        @static_schema
       end
 
     private

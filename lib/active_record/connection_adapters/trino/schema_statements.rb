@@ -5,14 +5,20 @@ module ActiveRecord
     module Trino
       module SchemaStatements
         def columns(table_name)
+          table = table_name.to_s
+          declared = ActiveRecord::Trino.static_columns[table]
+          return build_static_columns(declared) if declared
+
           if bulk_column_reflection?
-            column_definitions.fetch(table_name.to_s, [])
+            column_definitions.fetch(table, [])
           else
-            build_columns(run_trino_query(table_columns_query(table_name.to_s)).rows)
+            build_columns(run_trino_query(table_columns_query(table)).rows)
           end
         end
 
         def data_sources
+          return ActiveRecord::Trino.static_columns.keys if static_schema?
+
           run_trino_query("SHOW TABLES").rows.map(&:first)
         end
         alias tables data_sources
@@ -55,6 +61,18 @@ module ActiveRecord
               sql_type: data_type,
               type: type_map.lookup(data_type),
               null: nullable?(is_nullable)
+            )
+          end
+        end
+
+        def build_static_columns(definitions)
+          definitions.map do |definition|
+            sql_type = definition.fetch(:sql_type)
+            Trino::Column.new(
+              name: definition.fetch(:name).to_s,
+              sql_type: sql_type,
+              type: type_map.lookup(sql_type),
+              null: definition.fetch(:null, true)
             )
           end
         end

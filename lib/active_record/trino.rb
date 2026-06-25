@@ -31,6 +31,14 @@ end
 
 module ActiveRecord
   module Trino
+    def self.static_columns
+      @static_columns ||= {}
+    end
+
+    def self.define_columns(table_name, definitions)
+      static_columns[table_name.to_s] = Array(definitions)
+    end
+
     def self.reset_schema_cache!(model_class)
       model_class.reset_column_information
 
