@@ -9,6 +9,9 @@
   identical to 0.1.0. `disconnect!` shuts down the keep-alive pool and
   `reconnect!` rebuilds it.
 - `gzip: true` passthrough to trino-client to compress HTTP response bodies.
+- Schema reflection is now shared across a connection pool instead of being
+  cached per connection. The adapter no longer overrides `schema_cache`, so it
+  falls back to Rails' pool-level `schema_reflection`.
 
 ## [0.1.0] - 2026-05-21
 

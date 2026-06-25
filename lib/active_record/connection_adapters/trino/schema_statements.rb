@@ -46,10 +46,6 @@ module ActiveRecord
           false
         end
 
-        def schema_cache
-          @schema_cache ||= ActiveRecord::ConnectionAdapters::SchemaCache.new(self)
-        end
-
       private
 
         def columns_query(table_name)
