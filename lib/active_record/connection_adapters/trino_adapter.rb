@@ -32,6 +32,7 @@ module ActiveRecord
         @client_options = ActiveRecord::Trino::Config.client_options(@config)
         @slow_query_threshold = ActiveRecord::Trino::Config.slow_query_threshold(@config)
         @persistent = ActiveRecord::Trino::Config.persistent?(@config)
+        @bulk_column_reflection = ActiveRecord::Trino::Config.bulk_column_reflection?(@config)
         @client = build_client
         install_safety_belts!
       end
@@ -113,6 +114,10 @@ module ActiveRecord
 
       def persistent?
         @persistent
+      end
+
+      def bulk_column_reflection?
+        @bulk_column_reflection
       end
 
     private

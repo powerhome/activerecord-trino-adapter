@@ -9,28 +9,26 @@ RSpec.describe ActiveRecord::ConnectionAdapters::Trino::SchemaStatements do
     ActiveRecord::ConnectionAdapters::TrinoAdapter.new(trino_config)
   end
 
-  describe "#columns" do
-    let(:bulk_sql) do
-      <<~SQL.strip
-        SELECT table_name, column_name, data_type, is_nullable
+  let(:statement_url) { "#{TrinoFake::BASE_URL}/v1/statement" }
+
+  describe "#columns (default: per-table reflection)" do
+    it "queries information_schema.columns for the single table and returns Trino::Column instances" do
+      expected_sql = <<~SQL.strip
+        SELECT column_name, data_type, is_nullable
         FROM information_schema.columns
         WHERE table_catalog = 'test_catalog'
           AND table_schema = 'test_schema'
-        ORDER BY table_name, ordinal_position
+          AND table_name = 'orders'
+        ORDER BY ordinal_position
       SQL
-    end
 
-    let(:statement_url) { "#{TrinoFake::BASE_URL}/v1/statement" }
-
-    it "reflects the whole schema in one information_schema query and returns Trino::Column instances" do
       stub_trino_query(
-        sql: bulk_sql,
-        columns: [%w[table_name varchar], %w[column_name varchar], %w[data_type varchar], %w[is_nullable varchar]],
+        sql: expected_sql,
+        columns: [%w[column_name varchar], %w[data_type varchar], %w[is_nullable varchar]],
         rows: [
-          %w[orders id bigint NO],
-          %w[orders name varchar YES],
-          ["orders", "created_at", "timestamp(3)", "YES"],
-          %w[users id bigint NO],
+          %w[id bigint NO],
+          %w[name varchar YES],
+          ["created_at", "timestamp(3)", "YES"],
         ]
       )
 
@@ -41,6 +39,36 @@ RSpec.describe ActiveRecord::ConnectionAdapters::Trino::SchemaStatements do
       expect(columns.first.null).to be false
       expect(columns[1].null).to be true
       expect(columns.last.cast_type).to be_a(ActiveModel::Type::DateTime)
+    end
+
+    it "reflects each table independently (one query per table)" do
+      stub_trino_query(
+        sql: /table_name = 'orders'/, columns: [%w[c varchar]], rows: [%w[id bigint NO]], query_id: "o"
+      )
+      stub_trino_query(
+        sql: /table_name = 'users'/, columns: [%w[c varchar]], rows: [%w[email varchar YES]], query_id: "u"
+      )
+
+      adapter.columns("orders")
+      adapter.columns("users")
+
+      expect(a_request(:post, statement_url).with(body: /information_schema\.columns/)).to have_been_made.twice
+    end
+  end
+
+  describe "#columns (bulk_column_reflection: true)" do
+    let(:adapter) do
+      ActiveRecord::ConnectionAdapters::TrinoAdapter.new(trino_config(bulk_column_reflection: true))
+    end
+
+    let(:bulk_sql) do
+      <<~SQL.strip
+        SELECT table_name, column_name, data_type, is_nullable
+        FROM information_schema.columns
+        WHERE table_catalog = 'test_catalog'
+          AND table_schema = 'test_schema'
+        ORDER BY table_name, ordinal_position
+      SQL
     end
 
     it "serves every table from a single reflection query (no per-table round trips)" do

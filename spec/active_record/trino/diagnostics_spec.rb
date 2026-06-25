@@ -15,10 +15,10 @@ RSpec.describe ActiveRecord::Trino::Diagnostics do
 
     stub_trino_query(
       sql: /information_schema\.columns/,
-      columns: [%w[table_name varchar], %w[column_name varchar], %w[data_type varchar], %w[is_nullable varchar]],
+      columns: [%w[column_name varchar], %w[data_type varchar], %w[is_nullable varchar]],
       rows: [
-        %w[users id bigint NO],
-        %w[users name varchar YES],
+        %w[id bigint NO],
+        %w[name varchar YES],
       ],
       query_id: "schema_q"
     )

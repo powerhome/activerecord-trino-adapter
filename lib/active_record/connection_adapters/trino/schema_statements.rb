@@ -5,7 +5,11 @@ module ActiveRecord
     module Trino
       module SchemaStatements
         def columns(table_name)
-          column_definitions.fetch(table_name.to_s, [])
+          if bulk_column_reflection?
+            column_definitions.fetch(table_name.to_s, [])
+          else
+            build_columns(run_trino_query(table_columns_query(table_name.to_s)).rows)
+          end
         end
 
         def data_sources
@@ -44,21 +48,36 @@ module ActiveRecord
 
       private
 
+        def build_columns(rows)
+          rows.map do |name, data_type, is_nullable|
+            Trino::Column.new(
+              name: name,
+              sql_type: data_type,
+              type: type_map.lookup(data_type),
+              null: nullable?(is_nullable)
+            )
+          end
+        end
+
         def column_definitions
           @column_definitions ||= load_column_definitions
         end
 
         def load_column_definitions
           run_trino_query(all_columns_query).rows.group_by(&:first).transform_values do |rows|
-            rows.map do |_table_name, name, data_type, is_nullable|
-              Trino::Column.new(
-                name: name,
-                sql_type: data_type,
-                type: type_map.lookup(data_type),
-                null: nullable?(is_nullable)
-              )
-            end
+            build_columns(rows.map { |row| row.drop(1) })
           end
+        end
+
+        def table_columns_query(table_name)
+          <<~SQL.strip
+            SELECT column_name, data_type, is_nullable
+            FROM information_schema.columns
+            WHERE table_catalog = #{quote(trino_catalog)}
+              AND table_schema = #{quote(trino_schema)}
+              AND table_name = #{quote(table_name)}
+            ORDER BY ordinal_position
+          SQL
         end
 
         def all_columns_query

@@ -12,9 +12,9 @@
 - Schema reflection is now shared across a connection pool instead of being
   cached per connection. The adapter no longer overrides `schema_cache`, so it
   falls back to Rails' pool-level `schema_reflection`.
-- Column reflection is now a single bulk `information_schema.columns` query for
-  the whole catalog/schema, memoized per connection and grouped by table —
-  instead of one query per table.
+- Opt-in bulk column reflection via a new `bulk_column_reflection: true` key in
+  `database.yml`. When enabled, schema reflection runs a single
+  `information_schema.columns` query for the whole catalog/schema.
 
 ## [0.1.0] - 2026-05-21
 
