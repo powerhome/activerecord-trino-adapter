@@ -22,5 +22,6 @@ RSpec.configure do |config|
   config.after do
     WebMock.reset!
     WebMock.allow_net_connect!
+    ActiveRecord::Trino.static_columns.clear
   end
 end

@@ -31,8 +31,21 @@ end
 
 module ActiveRecord
   module Trino
+    def self.static_columns
+      @static_columns ||= {}
+    end
+
+    def self.define_columns(table_name, definitions)
+      static_columns[table_name.to_s] = Array(definitions)
+    end
+
     def self.reset_schema_cache!(model_class)
       model_class.reset_column_information
+
+      model_class.connection_pool.connections.each do |conn|
+        conn.clear_column_cache! if conn.respond_to?(:clear_column_cache!)
+      end
+
       return unless model_class.connection.respond_to?(:schema_cache)
 
       model_class.connection.schema_cache.clear!
