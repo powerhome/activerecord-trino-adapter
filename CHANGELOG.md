@@ -1,4 +1,4 @@
-## [0.3.0] - 2026-06-26
+## [0.2.1] - 2026-06-26
 
 - New runtime dependency on `faraday-net_http_persistent` (>= 1.2). The 1.x line
   is supported so consumers pinned to faraday 1.x (e.g. via elasticsearch-transport
