@@ -1,6 +1,11 @@
-## [Unreleased]
+## [0.2.1] - 2026-06-26
 
-- New runtime dependency on `faraday-net_http_persistent` (>= 2.0).
+- New runtime dependency on `faraday-net_http_persistent` (>= 1.2). The 1.x line
+  is supported so consumers pinned to faraday 1.x (e.g. via elasticsearch-transport
+  or kickbox)
+
+## [0.2.0] - 2026-06-26
+
 - Opt-in persistent HTTP connections via a new `persistent: true` key in
   `database.yml`. The adapter memoizes one keep-alive Faraday connection per
   adapter instance (built on `faraday-net_http_persistent`), eliminating the
