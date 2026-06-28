@@ -35,7 +35,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.3"
+          ruby-version: "3.4.9"
           bundler-cache: true
       - name: Run rubocop
         run: bundle exec rubocop
@@ -47,7 +47,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.3"
+          ruby-version: "3.4.9"
           bundler-cache: true
       - name: Run license_finder
         run: bundle exec license_finder
