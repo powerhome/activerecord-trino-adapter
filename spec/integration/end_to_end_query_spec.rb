@@ -59,6 +59,45 @@ RSpec.describe "end-to-end Trino-backed AR model" do
     expect(rows.last.total).to eq(BigDecimal("1500.00"))
   end
 
+  # Regression: Rails 7.2 moved identifier quoting to class-level methods
+  # (Calculations#execute_grouped_calculation calls `adapter_class.quote_column_name`),
+  # where AbstractAdapter's class method raises NotImplementedError by default. Grouped
+  # calculations broke with a bare NotImplementedError until Trino::Quoting exposed
+  # quoting via ClassMethods. See lib/active_record/connection_adapters/trino/quoting.rb.
+  it "runs a grouped sum without raising" do
+    stub_trino_query(
+      sql: /SELECT SUM\("orders"\."total"\).*GROUP BY "orders"\."territory_id"/m,
+      columns: [["sum_total", "decimal(10, 2)"], ["orders_territory_id", "integer"]],
+      rows: [
+        ["199.99", 42],
+        ["1500.00", 7],
+      ],
+      query_id: "grouped_sum"
+    )
+
+    result = FakeOrder.group(:territory_id).sum(:total)
+
+    expect(result).to be_a(Hash)
+    expect(result).to eq(42 => BigDecimal("199.99"), 7 => BigDecimal("1500.00"))
+  end
+
+  it "runs a grouped count without raising" do
+    stub_trino_query(
+      sql: /SELECT COUNT\(\*\).*GROUP BY "orders"\."territory_id"/m,
+      columns: [%w[count_all bigint], %w[orders_territory_id integer]],
+      rows: [
+        ["1", 42],
+        ["2", 7],
+      ],
+      query_id: "grouped_count"
+    )
+
+    result = FakeOrder.group(:territory_id).count
+
+    expect(result).to be_a(Hash)
+    expect(result).to eq(42 => 1, 7 => 2)
+  end
+
   it "raises for find_each (Trino batching is unsupported)" do
     expect { FakeOrder.find_each { |_o| nil } }
       .to raise_error(ActiveRecord::Trino::Error, /find_each/)

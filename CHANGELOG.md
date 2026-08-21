@@ -1,3 +1,13 @@
+## [0.2.2] - 2026-08-21
+
+- Fix grouped ActiveRecord calculations (`.group(...).sum/.count/.average`) raising
+  `NotImplementedError` on Rails 7.2+. Rails 7.2 moved identifier quoting to
+  class-level methods (`ActiveRecord::Relation::Calculations#execute_grouped_calculation`
+  calls `adapter_class.quote_column_name`), where `AbstractAdapter`'s class method
+  raises by default. `Trino::Quoting` now exposes `quote_column_name`/`quote_table_name`
+  via an `ActiveSupport::Concern` `ClassMethods` module; the instance methods delegate
+  to them, so Rails 7.1 (which quotes via the connection instance) is unaffected.
+
 ## [0.2.1] - 2026-06-26
 
 - New runtime dependency on `faraday-net_http_persistent` (>= 1.2). The 1.x line

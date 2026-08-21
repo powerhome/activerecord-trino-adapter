@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "active_support/concern"
 require "bigdecimal"
 require "date"
 require "time"
@@ -8,6 +9,8 @@ module ActiveRecord
   module ConnectionAdapters
     module Trino
       module Quoting
+        extend ActiveSupport::Concern
+
         QUOTED_TRUE = "true"
         QUOTED_FALSE = "false"
         QUOTED_NULL = "NULL"
@@ -16,6 +19,16 @@ module ActiveRecord
         DATE_FORMAT = "%Y-%m-%d"
 
         NUL_BYTE = /\x00/
+
+        module ClassMethods
+          def quote_column_name(name)
+            %("#{name.to_s.gsub('"', '""')}")
+          end
+
+          def quote_table_name(name)
+            name.to_s.split(".").map { |part| quote_column_name(part) }.join(".")
+          end
+        end
 
         # rubocop:disable Metrics/CyclomaticComplexity, Lint/DuplicateBranch
         def quote(value)
@@ -43,11 +56,11 @@ module ActiveRecord
         end
 
         def quote_column_name(name)
-          %("#{name.to_s.gsub('"', '""')}")
+          self.class.quote_column_name(name)
         end
 
         def quote_table_name(name)
-          name.to_s.split(".").map { |part| quote_column_name(part) }.join(".")
+          self.class.quote_table_name(name)
         end
 
         def quoted_true

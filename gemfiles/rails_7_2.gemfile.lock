@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    activerecord-trino-adapter (0.2.1)
+    activerecord-trino-adapter (0.2.2)
       activerecord (>= 7.1, < 8.1)
       activesupport (>= 7.1, < 8.1)
       faraday-net_http_persistent (>= 1.2)
@@ -197,7 +197,7 @@ DEPENDENCIES
 CHECKSUMS
   activemodel (7.2.3.1) sha256=39e1869b85e7a0b64a8ccddf19f3fb0c44261b329785384bb88f878eab51c0d0
   activerecord (7.2.3.1) sha256=b89513e275da5b34183c5f2a497c154b02dcc7c811d399ab557e67e36170a05d
-  activerecord-trino-adapter (0.2.1)
+  activerecord-trino-adapter (0.2.2)
   activesupport (7.2.3.1) sha256=11ebed516a43a0bb47346227a35ebae4d9427465a7c9eb197a03d5c8d283cb34
   addressable (2.9.0) sha256=7fdf6ac3660f7f4e867a0838be3f6cf722ace541dd97767fa42bc6cfa980c7af
   appraisal (2.5.0) sha256=36989221be127913b0dba8d114da2001e6b2dceea7bd4951200eaba764eed3ce

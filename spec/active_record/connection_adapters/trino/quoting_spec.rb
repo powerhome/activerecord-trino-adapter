@@ -4,11 +4,13 @@ require "spec_helper"
 require "bigdecimal"
 
 RSpec.describe ActiveRecord::ConnectionAdapters::Trino::Quoting do
-  let(:host) do
+  let(:host_class) do
     Class.new do
       include ActiveRecord::ConnectionAdapters::Trino::Quoting
-    end.new
+    end
   end
+
+  let(:host) { host_class.new }
 
   describe "#quote" do
     it "renders nil as NULL" do
@@ -120,5 +122,31 @@ RSpec.describe ActiveRecord::ConnectionAdapters::Trino::Quoting do
   describe "#quoted_true / #quoted_false" do
     it { expect(host.quoted_true).to eq("true") }
     it { expect(host.quoted_false).to eq("false") }
+  end
+
+  # Rails 7.2+ quotes identifiers at the class level, so `include Trino::Quoting`
+  # must expose quote_column_name/quote_table_name as class methods too. The instance
+  # methods above delegate to these. See quoting.rb's ClassMethods.
+  describe "class-level quoting (Rails 7.2+)" do
+    it "double-quotes and escapes column names on the class" do
+      expect(host_class.quote_column_name("col_a")).to eq(%("col_a"))
+      expect(host_class.quote_column_name(%(a"b))).to eq(%("a""b"))
+    end
+
+    it "quotes dotted table names on the class" do
+      expect(host_class.quote_table_name("schema.tbl")).to eq(%("schema"."tbl"))
+    end
+
+    it "exposes the same class methods on the real TrinoAdapter" do
+      require "active_record/connection_adapters/trino_adapter"
+      adapter = ActiveRecord::ConnectionAdapters::TrinoAdapter
+      expect(adapter.quote_column_name(%(a"b))).to eq(%("a""b"))
+      expect(adapter.quote_table_name("schema.tbl")).to eq(%("schema"."tbl"))
+    end
+
+    it "delegates the instance methods to the class methods" do
+      expect(host.quote_column_name("col_a")).to eq(host_class.quote_column_name("col_a"))
+      expect(host.quote_table_name("schema.tbl")).to eq(host_class.quote_table_name("schema.tbl"))
+    end
   end
 end
