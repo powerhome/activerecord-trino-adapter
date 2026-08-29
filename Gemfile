@@ -10,5 +10,5 @@ group :development, :test do
   gem "rspec", "3.13.2"
   gem "rubocop", "1.82.1"
   gem "rubocop-powerhome"
-  gem "webmock", "3.26.2"
+  gem "webmock", "3.26.4"
 end
