@@ -5,7 +5,7 @@ PATH
       activerecord (>= 7.1, < 8.1)
       activesupport (>= 7.1, < 8.1)
       faraday-net_http_persistent (>= 1.2)
-      trino-client (= 2.2.4)
+      trino-client (= 2.3.1)
 
 GEM
   remote: https://rubygems.org/
@@ -49,16 +49,16 @@ GEM
     csv (3.3.5)
     diff-lcs (1.6.2)
     drb (2.2.3)
-    faraday (2.14.3)
-      faraday-net_http (>= 2.0, < 3.5)
+    faraday (2.15.1)
+      faraday-net_http (>= 2.0, < 3.6)
       json
       logger
     faraday-follow_redirects (0.5.0)
       faraday (>= 1, < 3)
-    faraday-gzip (3.1.0)
+    faraday-gzip (3.2.0)
       faraday (>= 2.0, < 3)
       zlib (~> 3.0)
-    faraday-net_http (3.4.4)
+    faraday-net_http (3.5.0)
       net-http (~> 0.5)
     faraday-net_http_persistent (2.3.1)
       faraday (~> 2.5)
@@ -82,11 +82,14 @@ GEM
     minitest (6.0.6)
       drb (~> 2.0)
       prism (~> 1.5)
-    msgpack (1.8.3)
-    net-http (0.9.1)
+    msgpack (1.8.7)
+    net-http (0.10.0)
+      net-protocol (>= 0.3.0)
       uri (>= 0.11.1)
     net-http-persistent (4.0.8)
       connection_pool (>= 2.2.4, < 4)
+    net-protocol (0.4.0)
+      timeout
     parallel (1.28.0)
     parser (3.3.11.1)
       ast (~> 2.4.1)
@@ -160,7 +163,7 @@ GEM
     thor (1.5.0)
     timeout (0.6.1)
     tomlrb (2.0.4)
-    trino-client (2.2.4)
+    trino-client (2.3.1)
       faraday (>= 1, < 3)
       faraday-follow_redirects (>= 0.3)
       faraday-gzip (>= 1)
@@ -170,7 +173,7 @@ GEM
     unicode-display_width (3.2.0)
       unicode-emoji (~> 4.1)
     unicode-emoji (4.2.0)
-    uri (1.1.1)
+    uri (1.1.2)
     webmock (3.26.2)
       addressable (>= 2.8.0)
       crack (>= 0.3.2)
@@ -178,7 +181,7 @@ GEM
     with_env (1.1.0)
     xml-simple (1.1.9)
       rexml
-    zlib (3.2.3)
+    zlib (3.2.4)
 
 PLATFORMS
   arm64-darwin-25
@@ -214,10 +217,10 @@ CHECKSUMS
   csv (3.3.5) sha256=6e5134ac3383ef728b7f02725d9872934f523cb40b961479f69cf3afa6c8e73f
   diff-lcs (1.6.2) sha256=9ae0d2cba7d4df3075fe8cd8602a8604993efc0dfa934cff568969efb1909962
   drb (2.2.3) sha256=0b00d6fdb50995fe4a45dea13663493c841112e4068656854646f418fda13373
-  faraday (2.14.3) sha256=1882247e6766615c8220b4392bf1d27f6ebb63d8e28267587cef1fb0bf37f278
+  faraday (2.15.1) sha256=8708154deda739c5e86cc42b74960e23e8491fce0eba9e11639a6a34b1ac288f
   faraday-follow_redirects (0.5.0) sha256=5cde93c894b30943a5d2b93c2fe9284216a6b756f7af406a1e55f211d97d10ad
-  faraday-gzip (3.1.0) sha256=320783690be169f9b7ddde11598b77156951343753f66a9ab98b1f6694433ff8
-  faraday-net_http (3.4.4) sha256=0e78af151747ed1b00f33e25973b4bc220d7f16c00c39676817c8b12331eb588
+  faraday-gzip (3.2.0) sha256=bedae115512201df9b9b13c95cb9a1aa4cb8a848286212d593b20e9456c8578f
+  faraday-net_http (3.5.0) sha256=2e7094c34e38754ee048cc3df47376f8657005d9375f8473bce1c3b526a22e36
   faraday-net_http_persistent (2.3.1) sha256=23ffba37d6a27807a10f033d01918ec958aa73fa6ff0fccfbcd5ce2d2e68fca3
   hashdiff (1.2.1) sha256=9c079dbc513dfc8833ab59c0c2d8f230fa28499cc5efb4b8dd276cf931457cd1
   i18n (1.15.2) sha256=00f9eb62412fe593b2a65a97daa75300d37abb8f7202ec748e94b6d46a9dd1b5
@@ -228,9 +231,10 @@ CHECKSUMS
   logger (1.7.0) sha256=196edec7cc44b66cfb40f9755ce11b392f21f7967696af15d274dde7edff0203
   method_source (1.1.0) sha256=181301c9c45b731b4769bc81e8860e72f9161ad7d66dd99103c9ab84f560f5c5
   minitest (6.0.6) sha256=153ea36d1d987a62942382b61075745042a2b3123b1cd48f4c3675af9cc7d6f1
-  msgpack (1.8.3) sha256=8bda4a6428d3244e50d6bd55854d354edbada88a4e1f4f5731a39a0f86bee6a1
-  net-http (0.9.1) sha256=25ba0b67c63e89df626ed8fac771d0ad24ad151a858af2cc8e6a716ca4336996
+  msgpack (1.8.7) sha256=dfefec761b5f9047e6e8d95d2c7f8af4b3725d984a01942adc533aa819a2df33
+  net-http (0.10.0) sha256=1a2ff6e37a05724973c43f2bf7bf105f59c36a4cd0a7e9b1c021a0a566987c27
   net-http-persistent (4.0.8) sha256=ef3de8319d691537b329053fae3a33195f8b070bbbfae8bf1a58c796081960e6
+  net-protocol (0.4.0) sha256=f9f90c8c6f64794a45160bf422177a336db12809de3beeeaa26b88fcd2e8c853
   parallel (1.28.0) sha256=33e6de1484baf2524792d178b0913fc8eb94c628d6cfe45599ad4458c638c970
   parser (3.3.11.1) sha256=d17ace7aabe3e72c3cc94043714be27cc6f852f104d81aa284c2281aecc65d54
   prism (1.9.0) sha256=7b530c6a9f92c24300014919c9dcbc055bf4cdf51ec30aed099b06cd6674ef85
@@ -261,15 +265,15 @@ CHECKSUMS
   thor (1.5.0) sha256=e3a9e55fe857e44859ce104a84675ab6e8cd59c650a49106a05f55f136425e73
   timeout (0.6.1) sha256=78f57368a7e7bbadec56971f78a3f5ecbcfb59b7fcbb0a3ed6ddc08a5094accb
   tomlrb (2.0.4) sha256=262f77947ac3ac9b3366a0a5940ecd238300c553e2e14f22009e2afcd2181b99
-  trino-client (2.2.4) sha256=37333cb9fd2a795bc9c934f53f1ff5604827fb5a826567a861f08cd947cb1201
+  trino-client (2.3.1) sha256=e4d8bd754a2568ca91dbb867c91c9c2a192bd5f54ef28f521106a0722c7d9165
   tzinfo (2.0.6) sha256=8daf828cc77bcf7d63b0e3bdb6caa47e2272dcfaf4fbfe46f8c3a9df087a829b
   unicode-display_width (3.2.0) sha256=0cdd96b5681a5949cdbc2c55e7b420facae74c4aaf9a9815eee1087cb1853c42
   unicode-emoji (4.2.0) sha256=519e69150f75652e40bf736106cfbc8f0f73aa3fb6a65afe62fefa7f80b0f80f
-  uri (1.1.1) sha256=379fa58d27ffb1387eaada68c749d1426738bd0f654d812fcc07e7568f5c57c6
+  uri (1.1.2) sha256=89292e98eabbef6248b0a0ed5e7e398e152f83f17560023a6d94a7f492b169fb
   webmock (3.26.2) sha256=774556f2ea6371846cca68c01769b2eac0d134492d21f6d0ab5dd643965a4c90
   with_env (1.1.0) sha256=50b3e4f0a6cda8f90d8a6bd87a6261f6c381429abafb161c4c69ad4a0cd0b6e4
   xml-simple (1.1.9) sha256=d21131e519c86f1a5bc2b6d2d57d46e6998e47f18ed249b25cad86433dbd695d
-  zlib (3.2.3) sha256=5bd316698b32f31a64ab910a8b6c282442ca1626a81bbd6a1674e8522e319c20
+  zlib (3.2.4) sha256=a0d0e5845a18d839c078fb5b6e4ae523ffb918601c2004a77c081ee211f9b038
 
 BUNDLED WITH
   4.0.3
