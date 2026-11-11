@@ -5,7 +5,7 @@ source "https://rubygems.org"
 gemspec
 
 group :development, :test do
-  gem "pry-byebug", "3.10.1"
+  gem "pry-byebug", "3.12.0"
   gem "rake", "~> 13.0"
   gem "rspec", "3.13.2"
   gem "rubocop", "1.82.1"
