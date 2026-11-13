@@ -25,7 +25,7 @@ Gem::Specification.new do |spec|
   spec.files = Dir["{lib}/**/*", "README.md", "LICENSE.txt"]
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "activerecord", ">= 7.1", "< 8.1"
+  spec.add_dependency "activerecord", ">= 7.1", "< 8.2"
   spec.add_dependency "activesupport", ">= 7.1", "< 8.1"
   spec.add_dependency "faraday-net_http_persistent", ">= 1.2"
   spec.add_dependency "trino-client", "2.2.4"
